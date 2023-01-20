@@ -1,59 +1,123 @@
 ﻿#pragma once
-#include <iostream>
-#include <string>
+#include "Binary_tree.h"
 #include <sstream>
-#include "Node.cpp"
+#include <iostream>
 
 
-/*
- * \brief Вывод дерева
- * \param Корень дерева
- */
-std::string ToString(struct node* root);
+Tree::Tree() : root(nullptr)
+{
+}
 
+Tree::~Tree()
+{
+    deleteTree(root);
+    root = nullptr;
+}
 
-/*
- * \brief Добавить ноду в дерево
- * \param Значение для вставки
- */
-struct node* insert(struct node* node, int key);
+Node* Tree::minValueNode(Node* leaf) {
+    Node* current = leaf;
 
-/*
- * \brief Поиск inorder-преемника
- * \param Корень дерева
- */
-struct node* minValueNode(struct node* node);
+    // Ищем крайний левый лист — он и будет inorder-преемником
+    while (current && current->left != NULL) {
+        current = current->left;
+    }
+    return current;
+}
 
-/*
- * \brief Удалить ноду из дерева
- * \param Корень дерева
- * \param Значение для удаления
- */
-struct node* deleteNode(struct node* root, int key);
+void Tree::deleteNode(int key) {
+    root = deleteNode(key, root);
+}
 
-/*
- * \brief Заменить одну ноду на другую в дереве
- * \param Корень дерева
- * \param Текущая нода
- * \param Старое значение
- * \param Новое значение
- */
-void changeNode(struct node* tree_root, struct node* root, int old_key, int new_key);
+Node* Tree::deleteNode(int key, Node* leaf) {
+    // Возвращаем, если дерево пустое
+    if (leaf == NULL) {
+        return leaf;
+    }
 
-/*
- * \brief Проверка дерева на пустоту
- * \param Корень дерева
- */
-bool IsEmpty(struct node* root);
+    // Ищем узел, который хотим удалить
+    if (key < leaf->key) {
+        leaf->left = deleteNode(key, leaf->left);
+    }
+    else if (key > leaf->key) {
+        leaf->right = deleteNode(key, leaf->right);
+    }
+    else {
+        // Если у узла один дочерний элемент или их нет
+        if (leaf->left == NULL) {
+            Node* temp = leaf->right;
+            free(leaf);
+            return temp;
+        }
+        else if (leaf->right == NULL) {
+            Node* temp = leaf->left;
+            free(leaf);
+            return temp;
+        }
 
-/*
- * \brief Узел дерева
- * \param Корень дерева
- */
-void deleteTree(struct node* root);
+        // Если у узла два дочерних элемента
+        Node* temp = minValueNode(leaf->right);
 
+        // Помещаем inorder-преемника на место узла, который хотим удалить
+        leaf->key = temp->key;
 
-std::string ToString(struct node* root) {
+        // Удаляем inorder-преемника
+        leaf->right = deleteNode(temp->key, leaf->right);
+    }
+    return leaf;
+}
+
+void Tree::deleteTree()
+{
+    deleteTree(root);
+    this->root = nullptr;
+}
+
+void Tree::deleteTree(Node* leaf)
+{
+    if (leaf != nullptr)
+    {
+        deleteTree(leaf->left);
+        deleteTree(leaf->right);
+        delete leaf;
+    }
+}
+
+bool Tree::IsEmpty() {
+    return this->root == nullptr;
+}
+
+void Tree::insert(int key)
+{
+    root = insert(key, root);
+}
+
+Node* Tree::newNode(int key) {
+    Node* temp = new Node;
+    temp->key = key;
+    return temp;
+}
+
+Node* Tree::insert(int key, Node* leaf) {
+    // Возвращаем новый узел, если дерево пустое
+    if (leaf == nullptr) {
+        return newNode(key);
+    }
+
+    // Проходим в нужное место и вставляет узел
+    if (key <= leaf->key) {
+        leaf->left = insert(key, leaf->left);
+    }
+    else {
+        leaf->right = insert(key, leaf->right);
+    }
+    return leaf;
+}
+
+void Tree::printTree() {
+    std::cout << ToString(this->root);
+}
+
+std::string Tree::ToString(Node* root) {
     if (root == nullptr) {
         return std::string("");
     }
@@ -62,97 +126,23 @@ std::string ToString(struct node* root) {
     return ss.str();
 }
 
-struct node* insert(struct node* node, int key) {
-    // Возвращаем новый узел, если дерево пустое
-    if (node == NULL) {
-        return newNode(key);
-    }
-
-    // Проходим в нужное место и вставляет узел
-    if (key <= node->key) {
-        node->left = insert(node->left, key);
-    }
-    else {
-        node->right = insert(node->right, key);
-    }
-    return node;
+void Tree::changeNode(int old_key, int new_key) {
+    changeNode(old_key, new_key, this->root);
 }
 
-struct node* minValueNode(struct node* node) {
-    struct node* current = node;
-
-    // Ищем крайний левый лист — он и будет inorder-преемником
-    while (current && current->left != NULL) {
-           current = current->left;
-    }
-    return current;
-}
-
-struct node* deleteNode(struct node* root, int key) {
-    // Возвращаем, если дерево пустое
-    if (root == NULL) {
-        return root;
-    }
-
-    // Ищем узел, который хотим удалить
-    if (key < root->key) {
-        root->left = deleteNode(root->left, key);
-    }
-    else if (key > root->key) {
-        root->right = deleteNode(root->right, key);
-    }
-    else {
-        // Если у узла один дочерний элемент или их нет
-        if (root->left == NULL) {
-            struct node* temp = root->right;
-            free(root);
-            return temp;
-        }
-        else if (root->right == NULL) {
-            struct node* temp = root->left;
-            free(root);
-            return temp;
-        }
-
-        // Если у узла два дочерних элемента
-        struct node* temp = minValueNode(root->right);
-
-        // Помещаем inorder-преемника на место узла, который хотим удалить
-        root->key = temp->key;
-
-        // Удаляем inorder-преемника
-        root->right = deleteNode(root->right, temp->key);
-    }
-    return root;
-}
-
-void changeNode(struct node* tree_root, struct node* root, int old_key, int new_key) {
+void Tree::changeNode(int old_key, int new_key, Node* root) {
     if (root == NULL) {
         return;
     }
     if (root->key == old_key) {
-        deleteNode(tree_root, old_key);
-        insert(tree_root, new_key);
+        deleteNode(old_key, this->root);
+        insert(new_key, this->root);
         return;
     }
     if (old_key <= root->key) {
-        changeNode(tree_root, root->left, old_key, new_key);
+        changeNode(old_key, new_key, root->left);
     }
     else {
-        changeNode(tree_root, root->right, old_key, new_key);
-    }
-}
-
-bool IsEmpty(struct node* root) {
-    return (root == NULL);
-}
-
-void deleteTree(struct node* root)
-{
-    if (root != nullptr)
-    {
-        deleteTree(root->left);
-        deleteTree(root->right);
-        delete root;
+        changeNode(old_key, new_key, root->right);
     }
 }

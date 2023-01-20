@@ -1,63 +1,72 @@
-#include <iostream>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include <../source/main.cpp>
+#include <Binary_tree.cpp>
 
 
-TEST(AvlTreeTestGroup, AvlTreeInsert) {
+using namespace std;
+
+
+TEST(BinaryTreeTestGroup, BinaryTree) {
     // Arange
     const int expected_data = 10;
-    struct node* root = NULL;
+    Tree* myTree = new Tree();
 
     // Act
-    root = insert(root, expected_data);
+    myTree->root->key = expected_data;
 
     // Assert
-    ASSERT_TRUE(root->key == expected_data);
+    ASSERT_TRUE(myTree->root->key == expected_data);
 }
 
-TEST(AvlTreeTestGroup, AvlTreeIsEmpty) {
+TEST(BinaryTreeTestGroup, BinaryTreeInsertKey) {
     // Arange
-    const int expected_data = 10;
-    struct node* root = NULL;
+    const int expected_data = 3;
+    Tree* myTree = new Tree();
 
     // Act
-    root = insert(root, expected_data);
-    root = deleteNode(root, expected_data);
+    myTree->insert(expected_data);
 
     // Assert
-    ASSERT_TRUE(root == nullptr);
+    ASSERT_TRUE(myTree->root->key == expected_data);
 }
 
-TEST(AvlTreeTestGroup, AvlTreeRemove) {
+TEST(BinaryTreeTestGroup, BinaryTreeInsertNode) {
     // Arange
-    struct node* root = NULL;
+    const int expected_key = 3;
+    Tree* myTree = new Tree();
+    Node* myNode = new Node(4);
 
     // Act
-    bool empty_flag = IsEmpty(root);
+    myTree->insert(expected_key, myNode);
+    Node* treeNode = myTree->root->right;
 
     // Assert
-    ASSERT_TRUE(empty_flag);
+    ASSERT_TRUE(treeNode->key == expected_key);
 }
 
-TEST(AvlTreeTestGroup, AvlTreeToString) {
+TEST(BinaryTreeTestGroup, BinaryTreeDelete) {
     // Arange
-    struct node* root = NULL;
-    std::string expected = " 1  3  4  6  7  8  10  14 ";
+    Tree* myTree = new Tree();
 
     // Act
-    root = insert(root, 8);
-    root = insert(root, 3);
-    root = insert(root, 1);
-    root = insert(root, 6);
-    root = insert(root, 7);
-    root = insert(root, 10);
-    root = insert(root, 14);
-    root = insert(root, 4);
+    myTree->deleteTree();
 
     // Assert
-    ASSERT_TRUE(ToString(root) == expected);
+    ASSERT_TRUE(myTree->root == nullptr);
+}
+
+TEST(BinaryTreeTestGroup, BinaryTreeEmpty) {
+    // Arange
+    const int expected_data = 3;
+    Tree* myTree = new Tree();
+
+    // Act
+    myTree->insert(expected_data);
+    bool isEmpty = myTree->IsEmpty();
+
+    // Assert
+    ASSERT_FALSE(isEmpty == true);
 }
 
 int main(int argc, char **argv)
